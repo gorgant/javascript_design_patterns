@@ -1,0 +1,12 @@
+.cat_image {
+  max-height: 360px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.click_count_container {
+  text-align: center;
+}
