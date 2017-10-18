@@ -114,7 +114,6 @@ $(function(){
           console.log('Cat to be incremented: ' + thisCat.name);
           octopus.logClick(thisCat.catId);
           catView.updateCatView(thisCat.catId);
-          // adminView.loadAdmin(catId);
         });
       },
 
@@ -139,7 +138,6 @@ $(function(){
       },
 
       renderAdmin: function(catId) {
-        console.log("admin rendered");
         $('#admin_form_container').toggle();
         $('#admin_form_container').submit(function(e) {
           event.preventDefault();
