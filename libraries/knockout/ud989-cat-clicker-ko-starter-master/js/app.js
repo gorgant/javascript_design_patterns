@@ -31,27 +31,6 @@ var initialCats = [
     }
   ];
 
-// var ViewModel = function() {
-
-//   var self = this;
-
-//   self.catList = ko.observableArray(initialCats);
-
-//   self.currentCat = ko.observable(new Cat(self.catList()[4]));
-
-//   self.updateCat = function(cat) {
-//     self.currentCat(new Cat(cat));
-//   };
-
-//   self.incrementCounter = function() {
-//     var selectedCat = self.catList().filter(function(cat) {
-//         return cat.catId === self.currentCat().catId();
-//       })[0];
-//     selectedCat.clickCount += 1;
-//     self.currentCat().clickCount(selectedCat.clickCount);
-//   };
-// }
-
 var ViewModel = function() {
 
   var self = this;
