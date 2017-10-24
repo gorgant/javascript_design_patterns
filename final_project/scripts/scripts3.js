@@ -10,6 +10,8 @@ function initMap() {
 function AppViewModel() {
   var self = this;
 
+  self.globalArray = ko.observableArray(["Tab", "Bee", "Tabber", "Tabberoo"]);
+
   MyApp.googleMaps = {
 
     //At the top here I'm storing the variables as objects in the GoogleMaps class
@@ -92,9 +94,9 @@ function AppViewModel() {
       console.log("Here's your array of markers");
       console.log(MyApp.googleMaps.markers);
       MyApp.googleMaps.showMarkers();
-      console.log("here's your updated places list")
-      self.updateList(results);
-      console.log(self.placesArray());
+      console.log("here's your updated globals")
+      self.updateList(self.globalArray);
+      console.log(self.markersArray());
     },
 
     createMarker: function(place, bounds) {
@@ -148,17 +150,10 @@ function AppViewModel() {
   };
 
   self.GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDN7GQGxljvIGM3fZsiNrmqJQP4Kra-rlk&callback=initMap&libraries=places";
-
-  self.placesArray = ko.observableArray([]);
-
+  self.markersArray = ko.observableArray(self.globalArray()); //GCR: FIGURE OUT HOW TO ACCESS THIS MAYBE W A SEPARATE VIEW MODEL? OR BY PUTTING THE WHOLE GOOGLE MAPS IN THIS VIEW MODEL?
+  console.log(self.markersArray());
   self.updateList = function(array) {
-    var nameArray = [];
-    for (var i = 0; i < array.length; i++) {
-      nameArray.push(array[i].name);
-    }
-    nameArray.sort();
-
-    self.placesArray(nameArray); //GCR: FIGURE OUT HOW TO GET THE NAMES TO BE CLICKABLE -- SEE CAT CLICKER
+    self.markersArray(array);
   };
 
 };

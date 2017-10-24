@@ -12,17 +12,11 @@
   </head>
   <body>
     <div class="container">
-      <div class="header">
-        <h1>My Map App</h1>
-      </div>
-      <div id="map"></div>
+      <h1>My Map App</h1>
+      <div id="map" style="height:500px;"></div>
       <script data-bind="attr: {src: GOOGLE_MAPS_URL}" async defer></script>
       <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
-      <div class="row">
-        <ul id="listOfPlaces" data-bind="foreach: placesArray">
-          <li> <span data-bind="text: $data"></span> </li>
-        </ul>
-      </div>
+      <div id="map2"></div>
     </div>
 
 
