@@ -161,6 +161,10 @@ function AppViewModel() {
     self.placesArray(nameArray); //GCR: FIGURE OUT HOW TO GET THE NAMES TO BE CLICKABLE -- SEE CAT CLICKER
   };
 
+  self.clickAction = function() {
+    console.log("Click registered!")
+  };
+
 };
 
 // Activates knockout.js
