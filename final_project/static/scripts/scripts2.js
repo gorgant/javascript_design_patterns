@@ -188,6 +188,7 @@ function AppViewModel() {
 
   self.updateList = function(array) {
     self.placesArray(array); //GCR: FIGURE OUT HOW TO SORT THE NAMES (RATHER THAN THE OBJECTS CONTAINING THEM)
+    self.hideData("");
   };
 
   self.clickedDomId = "";
@@ -202,9 +203,27 @@ function AppViewModel() {
     console.log(data.id);
     self.clickedDomId = data.id;
     self.yelpData = ko.observable();
+    self.yelpStatus = ko.observable();
     self.yelpLoaded(false);
 
-    self.searchYelp(data.name).done(function(result) {self.yelpData(result); self.yelpLoaded(true); console.log("data loaded");}).done(function(){self.ratingHider(self.clickedDomId)});
+
+
+    self.searchYelp(data.name)
+      .done(function(result) {
+        self.yelpData(result);
+        if(self.yelpData().is_closed){
+          self.yelpStatus({status: "Closed"});
+        }
+        else{
+          self.yelpStatus({status: "Open for Business"});
+        }
+        self.yelpLoaded(true);
+        console.log("data loaded");
+        console.log(result);
+      })
+      .done(function(){
+        self.hideData(self.clickedDomId)
+      });
 
 
     // var yelpData = $.Deferred();
@@ -244,9 +263,16 @@ function AppViewModel() {
     $(`#${data.id}`).append('<div class="yelp_data">Yelp Rating: <span data-bind="text: $yelpData.rating"></span></div>');
   };
 
-  self.ratingHider = function(id) {
-    $('.yelp_data').each(function(elem){
-      console.log($(this).parent());
+  self.hideData = function(id) {
+    $('.yelp_rating, .yelp_status, .yelp_price, .yelp_category').each(function(elem){
+      var thisId = $(this).parent().attr('id');
+      if(thisId == id){
+        return;
+      }
+      else {
+        $(this).toggle();
+      }
+      // console.log($(this).parent().attr('id'));
     });
   }
 
