@@ -1,12 +1,13 @@
+//This stores the entire goggleMaps data for easier access outside the module (may not be necessary?)
 var MyApp = {};
 
-
+//This is triggered by the maps script in the google maps script url
 function initMap() {
     MyApp.googleMaps.initMap();
   };
 
 
-// This is a simple *viewmodel* - JavaScript that defines the data and behavior of your UI
+// This is the ViewModel used by Knockout
 function AppViewModel() {
   var self = this;
 
@@ -22,6 +23,7 @@ function AppViewModel() {
     initMap: function() {
       var myLocation = new google.maps.LatLng(40.7417860,-73.9820010);
 
+      //Sets the map's initial location
       MyApp.googleMaps.thisMap = new google.maps.Map(document.getElementById('map'), {
         center: myLocation,
         zoom: 13,
@@ -40,6 +42,7 @@ function AppViewModel() {
         searchBox.setBounds(MyApp.googleMaps.thisMap.getBounds());
       });
 
+      //This listens for a change in location using the search bar
       searchBox.addListener('places_changed', function() {
         MyApp.googleMaps.deleteMarkers();
 
@@ -78,6 +81,7 @@ function AppViewModel() {
       });
     },
 
+    //This is a core display function for data on the screen
     configureMarkersAndBounds: function(results, bounds) {
       var updatedBounds = bounds;
 
@@ -91,6 +95,7 @@ function AppViewModel() {
       MyApp.googleMaps.applyDomClickListeners();
     },
 
+    //This creates a marker with all the appropriate listeners and properties
     createMarker: function(place, bounds) {
       var placeLoc = place.geometry.location;
       var marker = new google.maps.Marker({
@@ -100,16 +105,14 @@ function AppViewModel() {
         animation: google.maps.Animation.DROP,
         markerId: place.id //My custom marker property to match w DOM element
       });
+
+      //pops a window when a marker is clicked
       google.maps.event.addListener(marker, 'click', function() {
         MyApp.googleMaps.infowindow.setContent(place.name);
-
         MyApp.googleMaps.infowindow.open(MyApp.googleMaps.thisMap, this);
       });
 
-      google.maps.event.addListener(marker, 'click', function () {
-        MyApp.googleMaps.toggleBounce(marker);
-      });
-
+      //Add marker to the maps array (for gmaps) and the global array (for the knockout scripts)
       MyApp.googleMaps.markers.push(marker);
       self.globalArray.push(marker);
 
@@ -123,26 +126,31 @@ function AppViewModel() {
       return bounds;
     },
 
+    //Kicks of the setMapOnAll
     showMarkers: function() {
       MyApp.googleMaps.setMapOnAll(MyApp.googleMaps.thisMap);
     },
 
+    //This "places" the markers on the screan (setting their map value)
     setMapOnAll: function(thisMap) {
       for (var i = 0; i < MyApp.googleMaps.markers.length; i++) {
         MyApp.googleMaps.markers[i].setMap(thisMap);
       }
     },
 
+    //Hides the markers but doesn't delete them
     clearMarkers: function() {
       MyApp.googleMaps.setMapOnAll(null);
     },
 
+    //Hides the markers and clears the marker array (effectively deleting them)
     deleteMarkers: function() {
       MyApp.googleMaps.clearMarkers();
       MyApp.googleMaps.markers = [];
       self.globalArray = [];
     },
 
+    //This gets those markers to bounce
     toggleBounce: function(marker) {
         if (marker.getAnimation() !== null) {
           marker.setAnimation(null);
@@ -152,6 +160,7 @@ function AppViewModel() {
         }
     },
 
+    //This applies the click listeners to the DOM list items, listening for a click that then triggers a bounce
     applyDomClickListeners: function() {
       for (var i = 0; i < MyApp.googleMaps.markers.length; i++) {
         marker = MyApp.googleMaps.markers[i];
@@ -166,9 +175,6 @@ function AppViewModel() {
   };
 
   self.GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDN7GQGxljvIGM3fZsiNrmqJQP4Kra-rlk&callback=initMap&libraries=places";
-  self.YELP_CLIENT_ID = "80Xa0x2dWoo7fbUUmZ8sBg"
-  self.YELP_CLIENT_SECRET = "gjtVRXdRjj4ZBlRLxtrl4sAmju09IHovSYzau0CPDCEBpEah2bRS2zF6aWtuZKq4"
-  self.YELP_ACCESS_TOKEN ="hvRhWV3OQHKDR0D97deRhy2zpkb3cJLhbBwDmzLaxFfvwPMGtQUHlyQIRs6wO-Oro90fdSf1h3f9XBwO-TuTZ82qR-I1iY3EZfIYU3mh3X1VlWHSyQpSaLNMp3XwWXYx"
 
   self.placesArray = ko.observableArray([]);
 
@@ -177,16 +183,20 @@ function AppViewModel() {
     self.hideData("");
   };
 
+  //This stores a DOM value for use below
   self.clickedDomId = "";
 
+  //This helps prevent some things from loading until the yelp data has loaded
   self.yelpLoaded = ko.observable(false);
 
+  //This defines what happens when a list item is clicked
   self.clickAction = function(data) {
     self.clickedDomId = data.id;
     self.yelpData = ko.observable();
     self.yelpStatus = ko.observable();
     self.yelpLoaded(false);
-    self.searchYelp(data.name)
+    console.log(data);
+    self.searchYelp(data.name, data.vicinity)
       .done(function(result) {
         self.yelpData(result);
         if(self.yelpData().is_closed){
@@ -202,6 +212,7 @@ function AppViewModel() {
       });
   };
 
+  //get the marker to bounce when a list item is clicked (this sends the data to the google maps api)
   self.clickResponse = function(clickedDomId) {
     var currentMarker = MyApp.googleMaps.markers.filter(function(marker) {
             return marker.markerId == self.clickedDomId;
@@ -211,10 +222,10 @@ function AppViewModel() {
 
   };
 
-  //GCR: ADD THE ACTUAL LOCATION PARAMETER TO THIS
-  self.searchYelp = function(businessName) {
+  //kick off the json request on the server side (backend.py)
+  self.searchYelp = function(businessName, location) {
     return $.getJSON("/yelpBusinessSearch",
-              {business: businessName, location: "New York"},
+              {business: businessName, location: location},
               function(response){
               });
   };
@@ -227,7 +238,8 @@ function AppViewModel() {
     $('.yelp-info-container').each(function(elem){
       var thisId = $(this).closest(".list-item").attr('id');
       if(thisId == id){
-        return;
+        $(this).toggle(); //First toggles the item hidden so that it can be slid down
+        $(this).slideDown(); //Provides a cool slide down animation
       }
       else {
         $(this).toggle();

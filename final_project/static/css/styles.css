@@ -95,3 +95,15 @@
 #target {
   width: 345px;
 }
+
+.yelp-info-container {
+  outline: 3px solid orange;
+  padding-top: 5px;
+  padding-left: 15px;
+  padding-right: 15px;
+  padding-bottom: 15px;
+}
+
+#listOfPlacesContainer {
+  margin-top: 15px;
+}
