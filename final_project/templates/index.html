@@ -20,11 +20,24 @@
       <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
       <div class="row">
         <ul id="listOfPlaces" data-bind="foreach: placesArray">
-          <li>
-            <span data-bind="text: $data.name, click: $parent.clickAction, attr: {id: $data.id}"></span>
+          <li data-bind="click: $parent.clickAction, attr: {id: $data.id, class: 'list-item'}">
+            <span data-bind="text: $data.name"></span>
             <!-- ko if: $parent.yelpLoaded  -->
-              <div class="yelp_data" data-bind="with: $parent.yelpData">
-                Yelp Rating: <span data-bind="text: $data.rating"></span>
+              <div class="yelp-info-container">
+                <div class="yelp-price" data-bind="with: $parent.yelpData">
+                  <b>Price:</b> <span data-bind="text: $data.price"></span>
+                </div>
+                <div class="yelp-rating" data-bind="with: $parent.yelpData">
+                  <b>Yelp Rating:</b> <span data-bind="text: $data.rating"></span>
+                </div>
+                <div class="yelp-category" data-bind="with: $parent.yelpData">
+                  <b>Category:</b> <span data-bind="foreach: $data.categories">
+                    <span data-bind="text: title + ', '"></span>
+                  </span>
+                </div>
+                <div class="yelp-status" data-bind="with: $parent.yelpStatus">
+                  <b>Status:</b> <span data-bind="text: $data.status"></span>
+                </div>
               </div>
             <!-- /ko -->
           </li>
@@ -43,6 +56,6 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta.2/js/bootstrap.min.js" integrity="sha384-alpBpkh1PFOepccYVYDB4do5UnbKysX5WZXm3XxPqe5iKTfUKjNkCk9SaVuEZflJ" crossorigin="anonymous"></script>
     <!-- GCR: My additional scripts -->
     <script type='text/javascript' src='../static/scripts/knockout-3.4.2.js'></script>
-    <script type="text/javascript" src="../static/scripts/scripts2.js" ></script>
+    <script type="text/javascript" src="../static/scripts/scripts.js" ></script>
   </body>
 </html>

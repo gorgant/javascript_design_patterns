@@ -15,7 +15,7 @@ app = Flask(__name__)
 @app.route('/') #These "decorators" run the code below them IF the conditions are matched, in this case, if we are routed to the directories in the parenthesis
 @app.route('/map/')
 def loadmap():
-  return render_template('index2.html')
+  return render_template('index.html')
 
 # @app.route('/yelpTermSearch', methods=['GET','POST'])
 # def yelpTermSearch():

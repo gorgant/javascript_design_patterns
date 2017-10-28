@@ -44,7 +44,6 @@ function AppViewModel() {
         MyApp.googleMaps.deleteMarkers();
 
         var locationInput = searchBox.getPlaces();
-        console.log(locationInput);
 
         if (locationInput.length == 0) {
           return;
@@ -73,8 +72,6 @@ function AppViewModel() {
         //Create markers for each request result
         function gatherMarkers(results, status) {
           if (status == google.maps.places.PlacesServiceStatus.OK) {
-            console.log(MyApp.googleMaps.markers);
-            console.log(results);
             MyApp.googleMaps.configureMarkersAndBounds(results, bounds);
           }
         };
@@ -89,12 +86,9 @@ function AppViewModel() {
         updatedBounds = MyApp.googleMaps.createMarker(place, updatedBounds);
       }
       MyApp.googleMaps.thisMap.fitBounds(updatedBounds);
-      console.log("Here's your array of markers");
-      console.log(MyApp.googleMaps.markers);
       MyApp.googleMaps.showMarkers();
-      console.log("here's your updated places list")
       self.updateList(results);
-      console.log(self.placesArray());
+      MyApp.googleMaps.applyDomClickListeners();
     },
 
     createMarker: function(place, bounds) {
@@ -103,7 +97,8 @@ function AppViewModel() {
         //I've hidden the map so that it doesn't show by default, instead I use the showMarkers function
         // map: map,
         position: place.geometry.location,
-        animation: google.maps.Animation.DROP
+        animation: google.maps.Animation.DROP,
+        markerId: place.id //My custom marker property to match w DOM element
       });
       google.maps.event.addListener(marker, 'click', function() {
         MyApp.googleMaps.infowindow.setContent(place.name);
@@ -111,9 +106,12 @@ function AppViewModel() {
         MyApp.googleMaps.infowindow.open(MyApp.googleMaps.thisMap, this);
       });
 
+      google.maps.event.addListener(marker, 'click', function () {
+        MyApp.googleMaps.toggleBounce(marker);
+      });
+
       MyApp.googleMaps.markers.push(marker);
       self.globalArray.push(marker);
-      console.log("marker added");
 
       //This is for setting the map bounds -- basically, the location logged here will expand the bounds
       if (place.geometry.viewport) {
@@ -143,27 +141,99 @@ function AppViewModel() {
       MyApp.googleMaps.clearMarkers();
       MyApp.googleMaps.markers = [];
       self.globalArray = [];
-    }
+    },
+
+    toggleBounce: function(marker) {
+        if (marker.getAnimation() !== null) {
+          marker.setAnimation(null);
+        } else {
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          setTimeout(function(){ marker.setAnimation(null); }, 750);
+        }
+    },
+
+    applyDomClickListeners: function() {
+      for (var i = 0; i < MyApp.googleMaps.markers.length; i++) {
+        marker = MyApp.googleMaps.markers[i];
+        markerId = marker.markerId;
+        domElement = document.getElementById(marker.markerId)
+        google.maps.event.addDomListener(domElement, 'click', function () {
+          self.clickResponse();
+        });
+      }
+    },
 
   };
 
   self.GOOGLE_MAPS_URL = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDN7GQGxljvIGM3fZsiNrmqJQP4Kra-rlk&callback=initMap&libraries=places";
+  self.YELP_CLIENT_ID = "80Xa0x2dWoo7fbUUmZ8sBg"
+  self.YELP_CLIENT_SECRET = "gjtVRXdRjj4ZBlRLxtrl4sAmju09IHovSYzau0CPDCEBpEah2bRS2zF6aWtuZKq4"
+  self.YELP_ACCESS_TOKEN ="hvRhWV3OQHKDR0D97deRhy2zpkb3cJLhbBwDmzLaxFfvwPMGtQUHlyQIRs6wO-Oro90fdSf1h3f9XBwO-TuTZ82qR-I1iY3EZfIYU3mh3X1VlWHSyQpSaLNMp3XwWXYx"
 
   self.placesArray = ko.observableArray([]);
 
   self.updateList = function(array) {
-    var nameArray = [];
-    for (var i = 0; i < array.length; i++) {
-      nameArray.push(array[i].name);
-    }
-    nameArray.sort();
-
-    self.placesArray(nameArray); //GCR: FIGURE OUT HOW TO GET THE NAMES TO BE CLICKABLE -- SEE CAT CLICKER
+    self.placesArray(array); //GCR: FIGURE OUT HOW TO SORT THE NAMES (RATHER THAN THE OBJECTS CONTAINING THEM)
+    self.hideData("");
   };
 
-  self.clickAction = function() {
-    console.log("Click registered!")
+  self.clickedDomId = "";
+
+  self.yelpLoaded = ko.observable(false);
+
+  self.clickAction = function(data) {
+    self.clickedDomId = data.id;
+    self.yelpData = ko.observable();
+    self.yelpStatus = ko.observable();
+    self.yelpLoaded(false);
+    self.searchYelp(data.name)
+      .done(function(result) {
+        self.yelpData(result);
+        if(self.yelpData().is_closed){
+          self.yelpStatus({status: "Closed"});
+        }
+        else{
+          self.yelpStatus({status: "Open for Business"});
+        }
+        self.yelpLoaded(true);
+      })
+      .done(function(){
+        self.hideData(self.clickedDomId)
+      });
   };
+
+  self.clickResponse = function(clickedDomId) {
+    var currentMarker = MyApp.googleMaps.markers.filter(function(marker) {
+            return marker.markerId == self.clickedDomId;
+          })[0];
+    MyApp.googleMaps.toggleBounce(currentMarker);
+
+
+  };
+
+  //GCR: ADD THE ACTUAL LOCATION PARAMETER TO THIS
+  self.searchYelp = function(businessName) {
+    return $.getJSON("/yelpBusinessSearch",
+              {business: businessName, location: "New York"},
+              function(response){
+              });
+  };
+
+  self.applyYelpBinding = function(data, yelpData) {
+    $(`#${data.id}`).append('<div class="yelp_data">Yelp Rating: <span data-bind="text: $yelpData.rating"></span></div>');
+  };
+
+    self.hideData = function(id) {
+    $('.yelp-info-container').each(function(elem){
+      var thisId = $(this).closest(".list-item").attr('id');
+      if(thisId == id){
+        return;
+      }
+      else {
+        $(this).toggle();
+      }
+    });
+  }
 
 };
 
