@@ -1,0 +1,18 @@
+<ul data-bind="foreach: planets">
+    <li>
+        Planet: <b data-bind="text: name"> </b>
+        <div data-bind="if: capital">
+            Capital: <b data-bind="text: capital.cityName"> </b>
+        </div>
+    </li>
+</ul>
+
+<script type='text/javascript' src='../static/scripts/knockout-3.4.2.js'></script>
+<script>
+    ko.applyBindings({
+        planets: [
+            { name: 'Mercury', capital: null },
+            { name: 'Earth', capital: { cityName: 'Barnsley' } }
+        ]
+    });
+</script>

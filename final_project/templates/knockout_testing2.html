@@ -1,0 +1,31 @@
+<ul data-bind="foreach: planetsArray">
+    <li data-bind="click: $parent.addCapital">
+        Planet: <b data-bind="text: name"> </b>
+        <div data-bind="if: capital">
+            Capital: <b data-bind="text: capital.cityName"> </b>
+        </div>
+    </li>
+</ul>
+<button data-bind="click: addPlanet">Add Planet</button>
+
+<script type='text/javascript' src='../static/scripts/knockout-3.4.2.js'></script>
+<script>
+
+    function AppViewModel() {
+        var self = this;
+        self.planetsArray = ko.observableArray([
+            { name: 'Mercury', capital: null },
+            { name: 'Earth', capital: { cityName: 'Barnsley' } }
+        ]);
+
+        self.addPlanet = function() {
+            self.planetsArray.push({name: 'Eros', capital: {cityName: 'Holden'}});
+        };
+
+        self.addCapital = function(arrayItem) {
+            console.log(arrayItem.name);
+        }
+    }
+
+    ko.applyBindings(new AppViewModel);
+</script>

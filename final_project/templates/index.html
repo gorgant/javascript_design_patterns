@@ -20,11 +20,17 @@
       <input id="pac-input" class="controls" type="text" placeholder="Search Box"></input>
       <div class="row">
         <ul id="listOfPlaces" data-bind="foreach: placesArray">
-          <li> <span data-bind="text: $data.name, click: $parent.clickAction, attr: {id: $data.id}"></span> </li>
+          <li>
+            <span data-bind="text: $data.name, click: $parent.clickAction, attr: {id: $data.id}"></span>
+            <!-- ko if: $parent.yelpLoaded  -->
+              <div class="yelp_data" data-bind="with: $parent.yelpData">
+                Yelp Rating: <span data-bind="text: $data.rating"></span>
+              </div>
+            <!-- /ko -->
+          </li>
         </ul>
       </div>
     </div>
-
 
 
     <!-- Optional JavaScript -->

@@ -192,11 +192,28 @@ function AppViewModel() {
 
   self.clickedDomId = "";
 
+  // self.yelpData = ko.observable({rating: 4});
+  // self.yelpData = ko.observable();
+
+  self.yelpLoaded = ko.observable(false);
+
   self.clickAction = function(data) {
     console.log("Click registered with this id:");
     console.log(data.id);
     self.clickedDomId = data.id;
-    self.searchYelp(data.name);
+    self.yelpData = ko.observable();
+    self.yelpLoaded(false);
+
+    self.searchYelp(data.name).done(function(result) {self.yelpData(result); self.yelpLoaded(true); console.log("data loaded");}).done(function(){self.ratingHider(self.clickedDomId)});
+
+
+    // var yelpData = $.Deferred();
+    // // self.searchYelp(data.name);
+    // yelpData.then(console.log("Searching Complete"));
+    // // console.log(yelpData);
+    // yelpData.resolve(self.searchYelp(data.name));
+    // // self.applyYelpBinding(data, yelpData);
+
   };
 
   self.clickResponse = function(clickedDomId) {
@@ -212,13 +229,27 @@ function AppViewModel() {
 
   };
 
+  //GCR: ADD THE ACTUAL LOCATION PARAMETER TO THIS
   self.searchYelp = function(businessName) {
-    $.getJSON("/yelpBusinessSearch",
+    return $.getJSON("/yelpBusinessSearch",
               {business: businessName, location: "New York"},
               function(response){
                 console.log(response.name);
               });
+    // console.log(response.name);
+    // return response;
+  };
+
+  self.applyYelpBinding = function(data, yelpData) {
+    $(`#${data.id}`).append('<div class="yelp_data">Yelp Rating: <span data-bind="text: $yelpData.rating"></span></div>');
+  };
+
+  self.ratingHider = function(id) {
+    $('.yelp_data').each(function(elem){
+      console.log($(this).parent());
+    });
   }
+
 };
 
 // Activates knockout.js
