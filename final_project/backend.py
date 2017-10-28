@@ -4,7 +4,10 @@ from flask import (Flask,  #loads the flask app functionality, #constructs urls,
                   request, #handles get/post requests
                   redirect, #handles redirect requests
                   flash, #allows for flash messages
-                  jsonify) #enables us to configure an api endpoint for our application
+                  jsonify,
+                  make_response) #enables us to configure an api endpoint for our application
+
+from yelp_query import *
 
 #Instantiate the Flask app
 app = Flask(__name__)
@@ -12,7 +15,21 @@ app = Flask(__name__)
 @app.route('/') #These "decorators" run the code below them IF the conditions are matched, in this case, if we are routed to the directories in the parenthesis
 @app.route('/map/')
 def loadmap():
-  return "hello world"
+  return render_template('index.html')
+
+# @app.route('/yelpTermSearch', methods=['GET','POST'])
+# def yelpTermSearch():
+#   term = request.args.get('term','pizza',type=str)
+#   location = request.args.get('location','chicago',type=str)
+#   response = query_api(term, location)
+#   return jsonify(response)
+
+@app.route('/yelpBusinessSearch', methods=['GET','POST'])
+def yelpBusinessSearch():
+  business = request.args.get('business','pizza',type=str)
+  location = request.args.get('location','chicago',type=str)
+  response = query_api(business, location)
+  return jsonify(response)
 
 if __name__ == '__main__':
   app.secret_key = 'super_secret_key'
